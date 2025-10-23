@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Text, Input, PasswordInput, Button, Card } from '../../components/ui';
 import { useTheme } from '../../components/ThemeProvider';
-import { emailSignUp } from '../../lib/auth';
+import { emailSignUp, googleSignIn } from '../../lib/auth';
 import { UserPlus } from 'lucide-react-native';
 
 export default function SignUpScreen({ navigation }: any) {
@@ -72,6 +72,22 @@ export default function SignUpScreen({ navigation }: any) {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      await googleSignIn();
+      // Navigation will be handled automatically by auth state change
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      Alert.alert(
+        'Google Sign In Failed',
+        error.message || 'An error occurred. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -134,6 +150,22 @@ export default function SignUpScreen({ navigation }: any) {
               disabled={loading}
               style={styles.button}
             />
+
+            <View style={styles.divider}>
+              <View style={[styles.dividerLine, { backgroundColor: theme.colors.border }]} />
+              <Text variant="caption" color="secondary" style={styles.dividerText}>
+                OR
+              </Text>
+              <View style={[styles.dividerLine, { backgroundColor: theme.colors.border }]} />
+            </View>
+
+            <Button
+              title="Continue with Google"
+              onPress={handleGoogleSignIn}
+              disabled={loading}
+              variant="outline"
+              style={styles.googleButton}
+            />
           </Card>
 
           <View style={styles.footer}>
@@ -195,5 +227,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+  },
+  googleButton: {
+    marginTop: 8,
   },
 });

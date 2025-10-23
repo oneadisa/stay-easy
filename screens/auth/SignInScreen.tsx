@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Text, Input, PasswordInput, Button, Card } from '../../components/ui';
 import { useTheme } from '../../components/ThemeProvider';
-import { emailSignIn } from '../../lib/auth';
+import { emailSignIn, googleSignIn } from '../../lib/auth';
 import { Mail } from 'lucide-react-native';
 
 export default function SignInScreen({ navigation }: any) {
@@ -42,6 +42,22 @@ export default function SignInScreen({ navigation }: any) {
       console.error('Sign in error:', error);
       Alert.alert(
         'Sign In Failed',
+        error.message || 'An error occurred. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      await googleSignIn();
+      // Navigation will be handled automatically by auth state change
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      Alert.alert(
+        'Google Sign In Failed',
         error.message || 'An error occurred. Please try again.'
       );
     } finally {
@@ -100,6 +116,22 @@ export default function SignInScreen({ navigation }: any) {
               variant="outline"
               size="sm"
               style={styles.forgotButton}
+            />
+
+            <View style={styles.divider}>
+              <View style={[styles.dividerLine, { backgroundColor: theme.colors.border }]} />
+              <Text variant="caption" color="secondary" style={styles.dividerText}>
+                OR
+              </Text>
+              <View style={[styles.dividerLine, { backgroundColor: theme.colors.border }]} />
+            </View>
+
+            <Button
+              title="Continue with Google"
+              onPress={handleGoogleSignIn}
+              disabled={loading}
+              variant="outline"
+              style={styles.googleButton}
             />
           </Card>
 
@@ -165,5 +197,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+  },
+  googleButton: {
+    marginTop: 8,
   },
 });

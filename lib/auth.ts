@@ -11,6 +11,9 @@ import {
 import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { UserDoc } from '../types';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import Constants from 'expo-constants';
 
 /**
  * Sign up with email and password
@@ -50,27 +53,56 @@ export const emailSignIn = async (
   return credential.user;
 };
 
+// Configure Google Auth
+WebBrowser.maybeCompleteAuthSession();
+
+const googleConfig = {
+  clientId: Constants.expoConfig?.extra?.google?.expo || '',
+  iosClientId: Constants.expoConfig?.extra?.google?.ios || '',
+  androidClientId: Constants.expoConfig?.extra?.google?.android || '',
+};
+
 /**
- * Sign in with Google
- * Note: This requires expo-auth-session configuration
+ * Sign in with Google using Expo AuthSession
  */
-export const googleSignIn = async (idToken: string): Promise<User> => {
-  const credential = GoogleAuthProvider.credential(idToken);
-  const result = await signInWithCredential(auth, credential);
-  
-  // Create or update user document
-  const userDoc: Omit<UserDoc, 'uid'> = {
-    displayName: result.user.displayName || 'Guest',
-    email: result.user.email || '',
-    photoURL: result.user.photoURL || undefined,
-    role: 'guest',
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  };
-  
-  await setDoc(doc(db, 'users', result.user.uid), userDoc, { merge: true });
-  
-  return result.user;
+export const googleSignIn = async (): Promise<User> => {
+  try {
+    // Request Google authentication
+    const [request, response, promptAsync] = Google.useAuthRequest(googleConfig);
+    
+    const result = await promptAsync();
+    
+    if (result.type === 'success') {
+      const { id_token } = result.params;
+      
+      if (!id_token) {
+        throw new Error('No ID token received from Google');
+      }
+      
+      // Create Firebase credential
+      const credential = GoogleAuthProvider.credential(id_token);
+      const firebaseResult = await signInWithCredential(auth, credential);
+      
+      // Create or update user document
+      const userDoc: Omit<UserDoc, 'uid'> = {
+        displayName: firebaseResult.user.displayName || 'Guest',
+        email: firebaseResult.user.email || '',
+        photoURL: firebaseResult.user.photoURL || undefined,
+        role: 'guest',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      
+      await setDoc(doc(db, 'users', firebaseResult.user.uid), userDoc, { merge: true });
+      
+      return firebaseResult.user;
+    } else {
+      throw new Error('Google authentication was cancelled or failed');
+    }
+  } catch (error) {
+    console.error('Google Sign-In Error:', error);
+    throw error;
+  }
 };
 
 /**
