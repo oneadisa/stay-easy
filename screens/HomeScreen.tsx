@@ -37,50 +37,6 @@ export default function HomeScreen() {
           />
         </Card>
 
-        <Card variant="elevated" style={styles.card}>
-          <Text variant="h3" style={styles.cardTitle}>
-            UI Components
-          </Text>
-          <Text variant="body" color="secondary" style={styles.cardText}>
-            Testing our theme system with various components
-          </Text>
-          
-          <View style={styles.buttonRow}>
-            <Button 
-              title="Primary"
-              onPress={() => {}}
-              variant="primary"
-              size="sm"
-              style={styles.buttonSmall}
-            />
-            <Button 
-              title="Secondary"
-              onPress={() => {}}
-              variant="secondary"
-              size="sm"
-              style={styles.buttonSmall}
-            />
-            <Button 
-              title="Outline"
-              onPress={() => {}}
-              variant="outline"
-              size="sm"
-              style={styles.buttonSmall}
-            />
-          </View>
-        </Card>
-
-        <Card variant="outlined" style={styles.card}>
-          <Text variant="h3" style={styles.cardTitle}>
-            Text Variants
-          </Text>
-          <Text variant="h1">Heading 1</Text>
-          <Text variant="h2">Heading 2</Text>
-          <Text variant="h3">Heading 3</Text>
-          <Text variant="body">Body text</Text>
-          <Text variant="caption" color="secondary">Caption text</Text>
-          <Text variant="label">Label text</Text>
-        </Card>
       </View>
     </ScrollView>
   );
