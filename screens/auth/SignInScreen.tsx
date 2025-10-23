@@ -118,21 +118,6 @@ export default function SignInScreen({ navigation }: any) {
               style={styles.forgotButton}
             />
 
-            <View style={styles.divider}>
-              <View style={[styles.dividerLine, { backgroundColor: theme.colors.border }]} />
-              <Text variant="caption" color="secondary" style={styles.dividerText}>
-                OR
-              </Text>
-              <View style={[styles.dividerLine, { backgroundColor: theme.colors.border }]} />
-            </View>
-
-            <Button
-              title="Continue with Google"
-              onPress={handleGoogleSignIn}
-              disabled={loading}
-              variant="outline"
-              style={styles.googleButton}
-            />
           </Card>
 
           <View style={styles.footer}>

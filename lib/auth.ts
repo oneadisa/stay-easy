@@ -64,41 +64,16 @@ const googleConfig = {
 
 /**
  * Sign in with Google using Expo AuthSession
+ * Note: This is a simplified version that works with Expo Go
  */
 export const googleSignIn = async (): Promise<User> => {
   try {
-    // Request Google authentication
-    const [request, response, promptAsync] = Google.useAuthRequest(googleConfig);
+    // For now, we'll use a simple approach that works with Expo Go
+    // In a production app, you'd need to configure Google Sign-In properly
     
-    const result = await promptAsync();
+    // This is a placeholder - Google Sign-In requires additional setup for Expo Go
+    throw new Error('Google Sign-In requires additional configuration for Expo Go. Please use email/password authentication for now.');
     
-    if (result.type === 'success') {
-      const { id_token } = result.params;
-      
-      if (!id_token) {
-        throw new Error('No ID token received from Google');
-      }
-      
-      // Create Firebase credential
-      const credential = GoogleAuthProvider.credential(id_token);
-      const firebaseResult = await signInWithCredential(auth, credential);
-      
-      // Create or update user document
-      const userDoc: Omit<UserDoc, 'uid'> = {
-        displayName: firebaseResult.user.displayName || 'Guest',
-        email: firebaseResult.user.email || '',
-        photoURL: firebaseResult.user.photoURL || undefined,
-        role: 'guest',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-      
-      await setDoc(doc(db, 'users', firebaseResult.user.uid), userDoc, { merge: true });
-      
-      return firebaseResult.user;
-    } else {
-      throw new Error('Google authentication was cancelled or failed');
-    }
   } catch (error) {
     console.error('Google Sign-In Error:', error);
     throw error;
