@@ -15,14 +15,14 @@ export default ({ config }: any) => ({
   },
   ios: {
     supportsTablet: true,
-    bundleIdentifier: 'com.yourusername.stayeasy'
+    bundleIdentifier: 'com.oneadisa.stayeasy'
   },
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#ffffff'
     },
-    package: 'com.yourusername.stayeasy'
+    package: 'com.oneadisa.stayeasy'
   },
   extra: {
     firebase: {

@@ -6,6 +6,15 @@ import Constants from 'expo-constants';
 
 const cfg = Constants.expoConfig?.extra as any;
 
+// Debug: Log Firebase config (remove in production)
+console.log('Firebase Config:', {
+  apiKey: cfg?.firebase?.apiKey ? 'Present' : 'Missing',
+  authDomain: cfg?.firebase?.authDomain ? 'Present' : 'Missing',
+  projectId: cfg?.firebase?.projectId ? 'Present' : 'Missing',
+  storageBucket: cfg?.firebase?.storageBucket ? 'Present' : 'Missing',
+  appId: cfg?.firebase?.appId ? 'Present' : 'Missing',
+});
+
 // Initialize Firebase
 const app = getApps().length ? getApps()[0] : initializeApp(cfg.firebase);
 
