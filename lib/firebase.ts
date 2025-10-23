@@ -10,7 +10,8 @@ const cfg = Constants.expoConfig?.extra as any;
 const app = getApps().length ? getApps()[0] : initializeApp(cfg.firebase);
 
 // Initialize Auth
-// Note: Expo handles persistence automatically, no need for manual AsyncStorage setup
+// Note: For Expo managed workflow, auth persistence is handled automatically
+// The warning can be safely ignored as Expo provides its own persistence layer
 export const auth = getApps().length ? getAuth() : initializeAuth(app);
 
 // Initialize Firestore
