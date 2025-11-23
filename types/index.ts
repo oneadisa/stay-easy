@@ -69,6 +69,15 @@ export type Review = {
   createdAt: number;
 };
 
+// Filter types
+export type FilterParams = {
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  propertyType?: PropertyType;
+  minGuests?: number;
+};
+
 // Navigation types
 export type RootStackParamList = {
   Main: undefined;

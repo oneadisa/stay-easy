@@ -11,6 +11,7 @@ import HomeScreen from '../screens/HomeScreen';
 import BookingsScreen from '../screens/BookingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import HostScreen from '../screens/HostScreen';
+import PropertyDetailsScreen from '../screens/PropertyDetailsScreen';
 
 // Auth screens
 import SignInScreen from '../screens/auth/SignInScreen';
@@ -133,11 +134,21 @@ export default function AppNavigator() {
         }}
       >
         {user ? (
+          <>
           <Stack.Screen 
             name="Main" 
             component={TabNavigator}
             options={{ headerShown: false }}
           />
+            <Stack.Screen 
+              name="PropertyDetails" 
+              component={PropertyDetailsScreen}
+              options={{ 
+                title: 'Property Details',
+                headerBackTitle: 'Back'
+              }}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen 

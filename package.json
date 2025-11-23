@@ -12,6 +12,7 @@
     "emu": "firebase emulators:start",
     "emu:export": "firebase emulators:start --export-on-exit=./emulator-data",
     "emu:import": "firebase emulators:start --import=./emulator-data",
+    "seed": "ts-node --project tsconfig.node.json scripts/seedProperties.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "doctor": "expo-doctor",
@@ -47,6 +48,7 @@
     "eslint": "^9.37.0",
     "firebase-tools": "^14.20.0",
     "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
     "typescript": "~5.9.2"
   },
   "private": true
