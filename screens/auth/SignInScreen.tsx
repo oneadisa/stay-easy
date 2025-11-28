@@ -1,32 +1,42 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { Text, Input, PasswordInput, Button, Card } from '../../components/ui';
-import { useTheme } from '../../components/ThemeProvider';
-import { emailSignIn, googleSignIn } from '../../lib/auth';
-import { Mail } from 'lucide-react-native';
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
+import { Text, Input, PasswordInput, Button } from "../../components/ui";
+import { useTheme } from "../../components/ThemeProvider";
+import { emailSignIn, googleSignIn } from "../../lib/auth";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function SignInScreen({ navigation }: any) {
   const { theme } = useTheme();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
-    
+
     if (!email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
-    
+
     if (!password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -39,10 +49,10 @@ export default function SignInScreen({ navigation }: any) {
       await emailSignIn(email, password);
       // Navigation will be handled automatically by auth state change
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error("Sign in error:", error);
       Alert.alert(
-        'Sign In Failed',
-        error.message || 'An error occurred. Please try again.'
+        "Sign In Failed",
+        error.message || "An error occurred. Please try again."
       );
     } finally {
       setLoading(false);
@@ -55,10 +65,10 @@ export default function SignInScreen({ navigation }: any) {
       await googleSignIn();
       // Navigation will be handled automatically by auth state change
     } catch (error: any) {
-      console.error('Google sign in error:', error);
+      console.error("Google sign in error:", error);
       Alert.alert(
-        'Google Sign In Failed',
-        error.message || 'An error occurred. Please try again.'
+        "Google Sign In Failed",
+        error.message || "An error occurred. Please try again."
       );
     } finally {
       setLoading(false);
@@ -66,74 +76,162 @@ export default function SignInScreen({ navigation }: any) {
   };
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.content}>
           <View style={styles.header}>
-            <View style={[styles.iconContainer, { backgroundColor: theme.colors.primaryLight }]}>
-              <Mail size={32} color={theme.colors.primary} />
+            <View
+              style={[
+                styles.logoContainer,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="home-variant"
+                size={40}
+                color="#FFFFFF"
+              />
             </View>
-            <Text variant="h1" style={styles.title}>
-              Welcome Back
+            <Text variant="h1" style={styles.brandName}>
+              StayEasy
             </Text>
-            <Text variant="body" color="secondary" style={styles.subtitle}>
-              Sign in to continue to StayEasy
+            <Text variant="body" color="secondary" style={styles.tagline}>
+              Find your perfect stay, anywhere
             </Text>
           </View>
 
-          <Card style={styles.card}>
+          <View style={styles.welcomeSection}>
+            <Text variant="h2" style={styles.welcomeTitle}>
+              Welcome back
+            </Text>
+            <Text
+              variant="body"
+              color="secondary"
+              style={styles.welcomeSubtitle}
+            >
+              Sign in to explore amazing places
+            </Text>
+          </View>
+
+          <View style={styles.formContainer}>
             <Input
-              label="Email"
+              label="Email address"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.email) setErrors({ ...errors, email: undefined });
+              }}
               error={errors.email}
               placeholder="you@example.com"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              style={styles.input}
             />
 
             <PasswordInput
               label="Password"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.password)
+                  setErrors({ ...errors, password: undefined });
+              }}
               error={errors.password}
+              placeholder="Enter your password"
+              style={styles.input}
             />
 
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ForgotPassword")}
+              style={styles.forgotPasswordLink}
+              activeOpacity={0.7}
+            >
+              <Text
+                variant="body"
+                style={[
+                  styles.forgotPasswordText,
+                  { color: theme.colors.primary },
+                ]}
+              >
+                Forgot password?
+              </Text>
+            </TouchableOpacity>
+
             <Button
-              title={loading ? 'Signing In...' : 'Sign In'}
+              title={loading ? "Signing in..." : "Sign in"}
               onPress={handleSignIn}
               disabled={loading}
-              style={styles.button}
+              style={styles.signInButton}
+              rightIcon={
+                !loading && (
+                  <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+                )
+              }
             />
 
-            <Button
-              title="Forgot Password?"
-              onPress={() => navigation.navigate('ForgotPassword')}
-              variant="outline"
-              size="sm"
-              style={styles.forgotButton}
-            />
+            <View style={styles.divider}>
+              <View
+                style={[
+                  styles.dividerLine,
+                  { backgroundColor: theme.colors.border },
+                ]}
+              />
+              <Text variant="body" color="secondary" style={styles.dividerText}>
+                or continue with
+              </Text>
+              <View
+                style={[
+                  styles.dividerLine,
+                  { backgroundColor: theme.colors.border },
+                ]}
+              />
+            </View>
 
-          </Card>
-
-          <View style={styles.footer}>
-            <Text variant="body" color="secondary">
-              Don't have an account?{' '}
-            </Text>
             <Button
-              title="Sign Up"
-              onPress={() => navigation.navigate('SignUp')}
+              title="Continue with Google"
+              onPress={handleGoogleSignIn}
               variant="outline"
-              size="sm"
+              disabled={loading}
+              style={styles.googleButton}
+              leftIcon={
+                <Ionicons
+                  name="logo-google"
+                  size={20}
+                  color={theme.colors.primary}
+                />
+              }
             />
           </View>
+
+          <View style={styles.signUpSection}>
+            <Text variant="body" color="secondary" style={styles.signUpText}>
+              New to StayEasy?
+            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SignUp")}
+              activeOpacity={0.7}
+            >
+              <Text
+                variant="body"
+                style={[styles.signUpLink, { color: theme.colors.primary }]}
+              >
+                Create an account
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text variant="caption" color="secondary" style={styles.termsText}>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </Text>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -141,52 +239,79 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
+  keyboardAvoid: {
+    flex: 1,
   },
   content: {
     flex: 1,
     padding: 24,
-    justifyContent: 'center',
+    justifyContent: "space-between",
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 32,
+    alignItems: "center",
+    marginTop: 20,
+    marginBottom: 30,
   },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+  logoContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  title: {
+  brandName: {
+    fontSize: 32,
+    fontWeight: "700",
     marginBottom: 8,
-    textAlign: 'center',
+    letterSpacing: -0.5,
   },
-  subtitle: {
-    textAlign: 'center',
+  tagline: {
+    fontSize: 15,
+    textAlign: "center",
   },
-  card: {
+  welcomeSection: {
     marginBottom: 24,
   },
-  button: {
-    marginTop: 8,
+  welcomeTitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginBottom: 8,
   },
-  forgotButton: {
-    marginTop: 12,
+  welcomeSubtitle: {
+    fontSize: 16,
   },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+  formContainer: {
+    flex: 1,
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  input: {
+    marginBottom: 16,
+  },
+  forgotPasswordLink: {
+    alignSelf: "flex-end",
+    marginBottom: 20,
+    paddingVertical: 4,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  signInButton: {
+    marginBottom: 20,
+    height: 52,
+    borderRadius: 12,
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
   },
   dividerLine: {
     flex: 1,
@@ -194,8 +319,32 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     marginHorizontal: 16,
+    fontSize: 14,
   },
   googleButton: {
-    marginTop: 8,
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  signUpSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  signUpText: {
+    fontSize: 15,
+    marginTop: 15,
+  },
+  signUpLink: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginTop: 15,
+  },
+  termsText: {
+    textAlign: "center",
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: 20,
   },
 });

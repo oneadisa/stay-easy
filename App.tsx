@@ -1,7 +1,9 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider, useTheme } from './components/ThemeProvider';
+import { PropertiesProvider } from './utils/PropertiesContext';
 import AppNavigator from './navigation/AppNavigator';
+import { BookingProvider } from './utils/BookingContext';
 
 function AppContent() {
   const { theme } = useTheme();
@@ -9,9 +11,7 @@ function AppContent() {
   return (
     <>
       <AppNavigator />
-      <StatusBar 
-        style="auto"
-      />
+      <StatusBar style="auto" />
     </>
   );
 }
@@ -19,7 +19,11 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <PropertiesProvider>
+        <BookingProvider>
+          <AppContent />
+        </BookingProvider>
+      </PropertiesProvider>
     </ThemeProvider>
   );
 }
