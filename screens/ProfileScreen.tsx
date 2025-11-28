@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, ScrollView, TouchableOpacity, } from 'react-native';
 import { Text } from '../components/ui/Text';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useTheme } from '../components/ThemeProvider';
 import { useAuthUser } from '../state/authStore';
 import { logout } from '../lib/auth';
+import { Ionicons, } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const { theme, setMode, mode } = useTheme();
@@ -37,48 +39,175 @@ export default function ProfileScreen() {
     );
   };
 
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.content}>
-        <Text variant="h2" style={styles.title}>
-          Profile
-        </Text>
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
-        {user && (
-          <Card style={styles.card}>
-            <Text variant="h3" style={styles.cardTitle}>
-              Account
+  const menuItems = [
+    {
+      icon: 'person-outline',
+      label: 'Edit Profile',
+      onPress: () => console.log('Edit Profile'),
+      iconFamily: 'Ionicons' as const,
+    },
+    {
+      icon: 'bookmark-outline',
+      label: 'My Bookings',
+      onPress: () => console.log('My Bookings'),
+      iconFamily: 'Ionicons' as const,
+    },
+    {
+      icon: 'heart-outline',
+      label: 'Favorites',
+      onPress: () => console.log('Favorites'),
+      iconFamily: 'Ionicons' as const,
+    },
+    {
+      icon: 'wallet-outline',
+      label: 'Payment Methods',
+      onPress: () => console.log('Payment Methods'),
+      iconFamily: 'Ionicons' as const,
+    },
+    {
+      icon: 'notifications-outline',
+      label: 'Notifications',
+      onPress: () => console.log('Notifications'),
+      iconFamily: 'Ionicons' as const,
+    },
+    {
+      icon: 'help-circle-outline',
+      label: 'Help & Support',
+      onPress: () => console.log('Help & Support'),
+      iconFamily: 'Ionicons' as const,
+    },
+  ];
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
+          <View style={styles.headerContent}>
+            <View style={styles.avatarContainer}>
+              <View style={[styles.avatar, { backgroundColor: theme.colors.primaryLight }]}>
+                <Text style={[styles.avatarText, { color: theme.colors.primary }]}>
+                  {user?.displayName ? getInitials(user.displayName) : 'U'}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                style={[styles.editAvatarButton, { backgroundColor: '#FFFFFF' }]}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="camera" size={16} color={theme.colors.primary} />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.userName}>
+              {user?.displayName || 'User'}
             </Text>
-            <Text variant="body" style={styles.cardText}>
-              {user.displayName || 'User'}
+            <Text style={styles.userEmail}>
+              {user?.email}
             </Text>
-            <Text variant="caption" color="secondary" style={styles.cardText}>
-              {user.email}
-            </Text>
-            <Button 
-              title="Sign Out"
-              onPress={handleLogout}
-              variant="outline"
-              style={styles.button}
-            />
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          <Card style={styles.menuCard}>
+            {menuItems.map((item, index) => (
+              <TouchableOpacity
+                key={item.label}
+                style={[
+                  styles.menuItem,
+                  index !== menuItems.length - 1 && styles.menuItemBorder,
+                  { borderBottomColor: theme.colors.border },
+                ]}
+                onPress={item.onPress}
+                activeOpacity={0.7}
+              >
+                <View style={styles.menuItemLeft}>
+                  <View style={[styles.menuIconContainer, { backgroundColor: theme.colors.primaryLight }]}>
+                    <Ionicons 
+                      name={item.icon as any} 
+                      size={22} 
+                      color={theme.colors.primary} 
+                    />
+                  </View>
+                  <Text variant="body" style={styles.menuItemLabel}>
+                    {item.label}
+                  </Text>
+                </View>
+                <Ionicons 
+                  name="chevron-forward" 
+                  size={20} 
+                  color={theme.colors.textSecondary} 
+                />
+              </TouchableOpacity>
+            ))}
           </Card>
-        )}
-        
-        <Card style={styles.card}>
-          <Text variant="h3" style={styles.cardTitle}>
-            Theme Settings
-          </Text>
-          <Text variant="body" color="secondary" style={styles.cardText}>
-            Current mode: {mode}
-          </Text>
+
+          <Card style={styles.themeCard}>
+            <View style={styles.themeHeader}>
+              <View style={styles.themeHeaderLeft}>
+                <View style={[styles.menuIconContainer, { backgroundColor: theme.colors.primaryLight }]}>
+                  <Ionicons 
+                    name={mode === 'light' ? 'sunny' : 'moon'} 
+                    size={22} 
+                    color={theme.colors.primary} 
+                  />
+                </View>
+                <View>
+                  <Text variant="body" style={styles.themeTitle}>
+                    Appearance
+                  </Text>
+                  <Text variant="caption" color="secondary">
+                    {mode === 'light' ? 'Light Mode' : 'Dark Mode'}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.themeToggle,
+                  { backgroundColor: mode === 'dark' ? theme.colors.primary : theme.colors.border },
+                ]}
+                onPress={toggleTheme}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.themeToggleThumb,
+                    mode === 'dark' && styles.themeToggleThumbActive,
+                    { backgroundColor: '#FFFFFF' },
+                  ]}
+                />
+              </TouchableOpacity>
+            </View>
+          </Card>
+
+          {/* App Info */}
+          <View style={styles.appInfo}>
+            <Text variant="caption" color="secondary" style={styles.appInfoText}>
+              StayEasy v1.0.0
+            </Text>
+            <Text variant="caption" color="secondary" style={styles.appInfoText}>
+              Made with ❤️ for travelers
+            </Text>
+          </View>
+
+          {/* Logout Button */}
           <Button 
-            title={`Switch to ${mode === 'light' ? 'Dark' : 'Light'} Mode`}
-            onPress={toggleTheme}
-            style={styles.button}
+            title="Sign Out"
+            onPress={handleLogout}
+            variant="outline"
+            style={styles.logoutButton}
+            leftIcon={<Ionicons name="log-out-outline" size={20} color={theme.colors.error} />}
           />
-        </Card>
-      </View>
-    </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -86,22 +215,141 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  headerContent: {
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+  },
+  avatarText: {
+    fontSize: 36,
+    fontWeight: '700',
+  },
+  editAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  userEmail: {
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
   content: {
-    padding: 16,
+    padding: 24,
+    paddingTop: 24,
   },
-  title: {
-    marginBottom: 24,
+  menuCard: {
+    marginBottom: 16,
+    padding: 0,
+    overflow: 'hidden',
   },
-  card: {
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  menuItemBorder: {
+    borderBottomWidth: 1,
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  menuIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  menuItemLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  themeCard: {
     marginBottom: 16,
   },
-  cardTitle: {
-    marginBottom: 8,
+  themeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  cardText: {
-    marginBottom: 16,
+  themeHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  button: {
-    marginTop: 8,
+  themeTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  themeToggle: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
+    padding: 2,
+    justifyContent: 'center',
+  },
+  themeToggleThumb: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  themeToggleThumbActive: {
+    alignSelf: 'flex-end',
+  },
+  appInfo: {
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  appInfoText: {
+    marginBottom: 4,
+  },
+  logoutButton: {
+    marginBottom: 32,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
 });
