@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, Input, PasswordInput, Button, Card } from '../../components/ui';
 import { useTheme } from '../../components/ThemeProvider';
 import { emailSignUp, googleSignIn } from '../../lib/auth';
@@ -7,6 +8,7 @@ import { UserPlus } from 'lucide-react-native';
 
 export default function SignUpScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -89,17 +91,30 @@ export default function SignUpScreen({ navigation }: any) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.background,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.content}>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
           <View style={styles.header}>
             <View style={[styles.iconContainer, { backgroundColor: theme.colors.primaryLight }]}>
               <UserPlus size={32} color={theme.colors.primary} />
             </View>
-            <Text variant="h1" style={styles.title}>
+            <Text variant="display" style={styles.title}>
               Create Account
             </Text>
             <Text variant="body" color="secondary" style={styles.subtitle}>
@@ -154,24 +169,33 @@ export default function SignUpScreen({ navigation }: any) {
           </Card>
 
           <View style={styles.footer}>
-            <Text variant="body" color="secondary">
+            <Text variant="body" color="secondary" style={styles.footerText}>
               Already have an account?{' '}
             </Text>
-            <Button
-              title="Sign In"
+            <TouchableOpacity
               onPress={() => navigation.navigate('SignIn')}
-              variant="outline"
-              size="sm"
-            />
+              activeOpacity={0.7}
+            >
+              <Text
+                variant="body"
+                style={[styles.footerLink, { color: theme.colors.primary }]}
+              >
+                Sign In
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  keyboardAvoid: {
     flex: 1,
   },
   scrollContent: {
@@ -211,7 +235,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 4,
+    marginTop: 16,
+  },
+  footerText: {
+    fontSize: 15,
+  },
+  footerLink: {
+    fontSize: 15,
+    fontWeight: '600',
   },
   divider: {
     flexDirection: 'row',

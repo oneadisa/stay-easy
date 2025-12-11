@@ -88,7 +88,7 @@ export function PasswordInput({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <View style={[styles.container, style]}> {/* Apply style here */}
+    <View style={[styles.container, style]}>
       <Input
         label={label}
         value={value}

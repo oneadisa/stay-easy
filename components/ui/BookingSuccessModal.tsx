@@ -10,7 +10,7 @@ import { Property } from '../../lib/properties';
 import { useTheme } from '../ThemeProvider';
 import { Text } from './Text';
 import { Button } from './Button';
-import { Ionicons } from '@expo/vector-icons';
+import { X, Check, Calendar, Mail, Key, Heart } from 'lucide-react-native';
 
 interface BookingSuccessModalProps {
   visible: boolean;
@@ -48,18 +48,18 @@ export default function BookingSuccessModal({
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color={theme.colors.textPrimary} />
+            <X size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
           {/* Success Icon */}
           <View style={[styles.successIcon, { backgroundColor: theme.colors.primaryLight }]}>
-            <Ionicons name="checkmark" size={48} color={theme.colors.primary} />
+            <Check size={48} color={theme.colors.primary} />
           </View>
 
           {/* Success Message */}
-          <Text variant="h2" style={styles.successTitle}>Booking Confirmed!</Text>
+          <Text variant="heading" style={styles.successTitle}>Booking Confirmed!</Text>
           <Text variant="body" color="secondary" style={styles.successText}>
             Your stay at {property.title} has been successfully booked.
           </Text>
@@ -67,13 +67,13 @@ export default function BookingSuccessModal({
           {/* Booking Details */}
           <View style={[styles.bookingCard, { backgroundColor: theme.colors.surface }]}>
             <Image
-              source={{ uri: property.images[0] || 'https://via.placeholder.com/100' }}
+              source={{ uri: property.images[0] || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=100&h=100&fit=crop' }}
               style={styles.propertyImage}
             />
             <View style={styles.bookingDetails}>
               <Text variant="body" style={styles.propertyName}>{property.title}</Text>
               <View style={styles.bookingInfo}>
-                <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} />
+                <Calendar size={14} color={theme.colors.textSecondary} />
                 <Text variant="caption" color="secondary">
                   {dates.checkIn.toLocaleDateString()} - {dates.checkOut.toLocaleDateString()} • {nights} nights
                 </Text>
@@ -84,18 +84,18 @@ export default function BookingSuccessModal({
 
           {/* Next Steps */}
           <View style={styles.nextSteps}>
-            <Text variant="h3" style={styles.nextStepsTitle}>What's Next?</Text>
+            <Text variant="title" style={styles.nextStepsTitle}>What's Next?</Text>
             <View style={styles.steps}>
               <View style={styles.step}>
-                <Ionicons name="mail-outline" size={20} color={theme.colors.primary} />
+                <Mail size={20} color={theme.colors.primary} />
                 <Text variant="body" color="secondary">You'll receive a confirmation email</Text>
               </View>
               <View style={styles.step}>
-                <Ionicons name="key-outline" size={20} color={theme.colors.primary} />
+                <Key size={20} color={theme.colors.primary} />
                 <Text variant="body" color="secondary">Check-in instructions will be sent 24 hours before arrival</Text>
               </View>
               <View style={styles.step}>
-                <Ionicons name="heart-outline" size={20} color={theme.colors.primary} />
+                <Heart size={20} color={theme.colors.primary} />
                 <Text variant="body" color="secondary">Enjoy your stay!</Text>
               </View>
             </View>

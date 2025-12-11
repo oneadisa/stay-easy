@@ -1,32 +1,34 @@
 import React from 'react';
-import { View, ViewStyle, StyleProp } from 'react-native';
+import { View, ViewStyle, Pressable } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 
 interface CardProps {
   children: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
+  style?: ViewStyle;
   variant?: 'default' | 'elevated' | 'outlined';
+  onPress?: () => void;
 }
 
-export function Card({ children, style, variant = 'default' }: CardProps) {
+export function Card({ 
+  children, 
+  style, 
+  variant = 'default',
+  onPress 
+}: CardProps) {
   const { theme } = useTheme();
 
   const getCardStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
-      padding: theme.spacing.lg,
+      padding: theme.spacing.md,
     };
 
     switch (variant) {
       case 'elevated':
         return {
           ...baseStyle,
-          shadowColor: theme.colors.textPrimary,
-          shadowOffset: { width: 0, height: theme.elevation.sm },
-          shadowOpacity: (theme as any).mode === 'dark' ? 0.3 : 0.1,
-          shadowRadius: theme.elevation.md,
-          elevation: theme.elevation.sm,
+          ...theme.shadows.md, // Medium shadow for elevated cards
         };
       case 'outlined':
         return {
@@ -35,13 +37,34 @@ export function Card({ children, style, variant = 'default' }: CardProps) {
           borderColor: theme.colors.border,
         };
       default:
-        return baseStyle;
+        return {
+          ...baseStyle,
+          ...theme.shadows.sm, // Subtle shadow for default cards
+        };
     }
   };
 
-  return (
+  const cardContent = (
     <View style={[getCardStyle(), style]}>
       {children}
     </View>
   );
+
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [
+          {
+            opacity: pressed ? theme.opacity.pressed : 1,
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          },
+        ]}
+      >
+        {cardContent}
+      </Pressable>
+    );
+  }
+
+  return cardContent;
 }

@@ -6,15 +6,17 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
-  SafeAreaView,
+  ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, Input, PasswordInput, Button } from "../../components/ui";
 import { useTheme } from "../../components/ThemeProvider";
 import { emailSignIn, googleSignIn } from "../../lib/auth";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Home, ArrowRight } from 'lucide-react-native';
 
 export default function SignInScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,14 +78,26 @@ export default function SignInScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.background,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
     >
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
           <View style={styles.header}>
             <View
               style={[
@@ -91,13 +105,9 @@ export default function SignInScreen({ navigation }: any) {
                 { backgroundColor: theme.colors.primary },
               ]}
             >
-              <MaterialCommunityIcons
-                name="home-variant"
-                size={40}
-                color="#FFFFFF"
-              />
+              <Home size={40} color="#FFFFFF" />
             </View>
-            <Text variant="h1" style={styles.brandName}>
+            <Text variant="display" style={styles.brandName}>
               StayEasy
             </Text>
             <Text variant="body" color="secondary" style={styles.tagline}>
@@ -106,7 +116,7 @@ export default function SignInScreen({ navigation }: any) {
           </View>
 
           <View style={styles.welcomeSection}>
-            <Text variant="h2" style={styles.welcomeTitle}>
+            <Text variant="heading" style={styles.welcomeTitle}>
               Welcome back
             </Text>
             <Text
@@ -169,9 +179,9 @@ export default function SignInScreen({ navigation }: any) {
               disabled={loading}
               style={styles.signInButton}
               rightIcon={
-                !loading && (
-                  <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
-                )
+                !loading ? (
+                  <ArrowRight size={20} color="#FFFFFF" />
+                ) : undefined
               }
             />
 
@@ -199,19 +209,13 @@ export default function SignInScreen({ navigation }: any) {
               variant="outline"
               disabled={loading}
               style={styles.googleButton}
-              leftIcon={
-                <Ionicons
-                  name="logo-google"
-                  size={20}
-                  color={theme.colors.primary}
-                />
-              }
+              leftIcon={undefined}
             />
           </View>
 
           <View style={styles.signUpSection}>
             <Text variant="body" color="secondary" style={styles.signUpText}>
-              New to StayEasy?
+              New to StayEasy?{' '}
             </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate("SignUp")}
@@ -230,8 +234,9 @@ export default function SignInScreen({ navigation }: any) {
             By continuing, you agree to our Terms of Service and Privacy Policy
           </Text>
         </View>
+        </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -242,15 +247,17 @@ const styles = StyleSheet.create({
   keyboardAvoid: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 24,
+  },
   content: {
     flex: 1,
-    padding: 24,
-    justifyContent: "space-between",
   },
   header: {
     alignItems: "center",
     marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 40,
   },
   logoContainer: {
     width: 72,
@@ -287,9 +294,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   formContainer: {
-    flex: 1,
-    justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: 24,
   },
   input: {
     marginBottom: 16,
@@ -331,15 +336,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
+    marginTop: 8,
   },
   signUpText: {
     fontSize: 15,
-    marginTop: 15,
   },
   signUpLink: {
     fontSize: 15,
     fontWeight: "600",
-    marginTop: 15,
+    marginLeft: 4,
   },
   termsText: {
     textAlign: "center",

@@ -11,12 +11,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from './Text';
 import { Input } from './Input';
 import { Button } from './Button';
 import { useTheme } from '../ThemeProvider';
-import { Ionicons } from '@expo/vector-icons';
+import { X, CheckCircle, Circle, XCircle, CloudUpload } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { createProperty } from '../../lib/properties';
 import { useAuthUser } from '../../state/authStore';
@@ -24,7 +25,7 @@ import { useAuthUser } from '../../state/authStore';
 interface AddPropertyModalProps {
   visible: boolean;
   onClose: () => void;
-  onSuccess: (propertyData: any, imageUri: string) => void;
+  onSuccess: (propertyData: any, imageUris: string[]) => void;
 }
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Villa', 'Condo', 'Townhouse'];
@@ -32,6 +33,7 @@ const AMENITIES = ['WiFi', 'Kitchen', 'Parking', 'Pool', 'AC', 'TV', 'Washer', '
 
 export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPropertyModalProps) {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { user } = useAuthUser();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [price, setPrice] = useState('');
   const [cleaningFee, setCleaningFee] = useState('0');
   const [description, setDescription] = useState('');
@@ -62,40 +64,40 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
     setCity('');
     setCountry('');
     setSelectedAmenities([]);
-    setSelectedImage(null);
+    setSelectedImages([]);
     setPrice('');
     setCleaningFee('0');
     setDescription('');
   };
 
-  const pickImage = async () => {
+  const pickImages = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Sorry, we need camera roll permissions to select an image.');
+        Alert.alert('Permission Required', 'Sorry, we need camera roll permissions to select images.');
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [16, 9],
+        allowsEditing: false, // Disable editing when multiple selection is enabled
         quality: 0.8,
-        allowsMultipleSelection: false, // Only allow single selection
+        allowsMultipleSelection: true, // Allow multiple selection
       });
 
-      if (!result.canceled && result.assets[0]) {
-        setSelectedImage(result.assets[0].uri);
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const newImageUris = result.assets.map(asset => asset.uri);
+        setSelectedImages(prev => [...prev, ...newImageUris]);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
+      console.error('Error picking images:', error);
+      Alert.alert('Error', 'Failed to pick images. Please try again.');
     }
   };
 
-  const removeImage = () => {
-    setSelectedImage(null);
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const toggleAmenity = (amenity: string) => {
@@ -112,8 +114,8 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
       return;
     }
 
-    if (!selectedImage) {
-      Alert.alert('Image Required', 'Please select one property image.');
+    if (selectedImages.length === 0) {
+      Alert.alert('Images Required', 'Please select at least one property image.');
       return;
     }
 
@@ -138,7 +140,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
         description: description.trim(),
       };
 
-      await onSuccess(propertyData, selectedImage);
+      await onSuccess(propertyData, selectedImages);
       resetForm();
       onClose();
     } catch (error) {
@@ -158,7 +160,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
       case 3:
         return true; // Amenities optional
       case 4:
-        return selectedImage !== null; // Only one image required
+        return selectedImages.length > 0; // At least one image required
       case 5:
         return price && description.trim();
       default:
@@ -171,7 +173,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
       case 1:
         return (
           <View>
-            <Text variant="h3" style={styles.stepTitle}>Property Basics</Text>
+            <Text variant="title" style={styles.stepTitle}>Property Basics</Text>
             <Input
               label="Property Title"
               value={title}
@@ -190,7 +192,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
                   ]}
                   onPress={() => setType(t)}
                 >
-                  <Text style={[styles.typeText, type === t && { color: '#FFFFFF' }]}>{t}</Text>
+                  <Text variant="caption" style={type === t ? { ...styles.typeText, color: '#FFFFFF' } : styles.typeText}>{t}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -227,7 +229,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
       case 2:
         return (
           <View>
-            <Text variant="h3" style={styles.stepTitle}>Location</Text>
+            <Text variant="title" style={styles.stepTitle}>Location</Text>
             <Input 
               label="Address" 
               value={address} 
@@ -252,7 +254,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
       case 3:
         return (
           <View>
-            <Text variant="h3" style={styles.stepTitle}>Amenities</Text>
+            <Text variant="title" style={styles.stepTitle}>Amenities</Text>
             <Text variant="body" color="secondary" style={styles.subtitle}>
               Select what your property offers
             </Text>
@@ -270,12 +272,12 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
                   ]}
                   onPress={() => toggleAmenity(amenity)}
                 >
-                  <Ionicons
-                    name={selectedAmenities.includes(amenity) ? 'checkmark-circle' : 'ellipse-outline'}
-                    size={20}
-                    color={selectedAmenities.includes(amenity) ? theme.colors.primary : theme.colors.textSecondary}
-                  />
-                  <Text style={styles.amenityText}>{amenity}</Text>
+                  {selectedAmenities.includes(amenity) ? (
+                    <CheckCircle size={20} color={theme.colors.primary} />
+                  ) : (
+                    <Circle size={20} color={theme.colors.textSecondary} />
+                  )}
+                  <Text variant="caption" style={styles.amenityText}>{amenity}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -285,43 +287,40 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
       case 4:
         return (
           <View>
-            <Text variant="h3" style={styles.stepTitle}>Property Photo</Text>
+            <Text variant="title" style={styles.stepTitle}>Property Photos</Text>
             <Text variant="body" color="secondary" style={styles.subtitle}>
-              Add one photo of your property
+              Add photos of your property (at least 1, up to 10)
             </Text>
             
-            {selectedImage ? (
-              <View style={styles.imagePreviewContainer}>
-                <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
-                <TouchableOpacity style={styles.removeImageButton} onPress={removeImage}>
-                  <Ionicons name="close-circle" size={28} color="#EF4444" />
-                </TouchableOpacity>
-                <Text variant="caption" color="secondary" style={styles.imageHint}>
-                  Tap the image to change it
-                </Text>
+            {selectedImages.length > 0 && (
+              <View style={styles.imagesGrid}>
+                {selectedImages.map((imageUri, index) => (
+                  <View key={index} style={styles.imagePreviewContainer}>
+                    <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+                    <TouchableOpacity 
+                      style={styles.removeImageButton} 
+                      onPress={() => removeImage(index)}
+                    >
+                      <XCircle size={24} color="#EF4444" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
               </View>
-            ) : (
-              <TouchableOpacity
-                style={[styles.uploadButton, { borderColor: theme.colors.border }]}
-                onPress={pickImage}
-              >
-                <Ionicons name="cloud-upload-outline" size={48} color={theme.colors.primary} />
-                <Text variant="body" style={styles.uploadText}>Choose Photo</Text>
-                <Text variant="caption" color="secondary" style={styles.uploadSubtext}>
-                  Select one image of your property
-                </Text>
-              </TouchableOpacity>
             )}
 
-            {!selectedImage && (
+            {selectedImages.length < 10 && (
               <TouchableOpacity
                 style={[styles.uploadButton, { borderColor: theme.colors.border }]}
-                onPress={pickImage}
+                onPress={pickImages}
               >
-                <Ionicons name="cloud-upload-outline" size={48} color={theme.colors.primary} />
-                <Text variant="body" style={styles.uploadText}>Choose Photo</Text>
+                <CloudUpload size={48} color={theme.colors.primary} />
+                <Text variant="body" style={styles.uploadText}>
+                  {selectedImages.length === 0 ? 'Choose Photos' : 'Add More Photos'}
+                </Text>
                 <Text variant="caption" color="secondary" style={styles.uploadSubtext}>
-                  Select one image of your property
+                  {selectedImages.length === 0 
+                    ? 'Select images of your property' 
+                    : `${selectedImages.length} photo${selectedImages.length === 1 ? '' : 's'} selected`}
                 </Text>
               </TouchableOpacity>
             )}
@@ -331,24 +330,24 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
       case 5:
         return (
           <View>
-            <Text variant="h3" style={styles.stepTitle}>Pricing & Description</Text>
+            <Text variant="title" style={styles.stepTitle}>Pricing & Description</Text>
             <View style={styles.row}>
               <View style={styles.inputHalf}>
                 <Input
-                  label="Price per Night ($)"
+                  label="Price per Night (₦)"
                   value={price}
                   onChangeText={setPrice}
                   keyboardType="numeric"
-                  placeholder="100"
+                  placeholder="25000"
                 />
               </View>
               <View style={styles.inputHalf}>
                 <Input
-                  label="Cleaning Fee ($)"
+                  label="Cleaning Fee (₦)"
                   value={cleaningFee}
                   onChangeText={setCleaningFee}
                   keyboardType="numeric"
-                  placeholder="20"
+                  placeholder="3000"
                 />
               </View>
             </View>
@@ -372,7 +371,7 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
   const handleClose = () => {
     if (loading) return;
     
-    if (step > 1 || title || selectedImage) {
+    if (step > 1 || title || selectedImages.length > 0) {
       Alert.alert(
         'Discard Changes?',
         'You have unsaved changes. Are you sure you want to discard them?',
@@ -405,11 +404,25 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Header */}
-        <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
-          <TouchableOpacity onPress={handleClose} disabled={loading}>
-            <Ionicons name="close" size={28} color={theme.colors.textPrimary} />
+        <View 
+          style={[
+            styles.header, 
+            { 
+              borderBottomColor: theme.colors.border,
+              paddingTop: insets.top + 8,
+            }
+          ]}
+        >
+          <TouchableOpacity 
+            onPress={handleClose} 
+            disabled={loading}
+            style={styles.closeButton}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <X size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
-          <Text variant="h3">Add Property</Text>
+          <Text variant="title">Add Property</Text>
           <View style={{ width: 28 }} />
         </View>
 
@@ -427,12 +440,25 @@ export default function AddPropertyModal({ visible, onClose, onSuccess }: AddPro
         </View>
 
         {/* Content */}
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.content} 
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           {renderStep()}
         </ScrollView>
 
         {/* Footer */}
-        <View style={[styles.footer, { borderTopColor: theme.colors.border }]}>
+        <View 
+          style={[
+            styles.footer, 
+            { 
+              borderTopColor: theme.colors.border,
+              paddingBottom: insets.bottom + 8,
+            }
+          ]}
+        >
           {step > 1 && (
             <Button
               title="Back"
@@ -473,8 +499,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingBottom: 16,
     borderBottomWidth: 1,
+  },
+  closeButton: {
+    padding: 4,
   },
   progress: {
     flexDirection: 'row',
@@ -489,7 +518,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  contentContainer: {
     padding: 24,
+    paddingBottom: 32,
   },
   stepTitle: {
     marginBottom: 8,
@@ -561,22 +593,28 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
-  imagePreviewContainer: {
-    alignItems: 'center',
+  imagesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
     marginBottom: 16,
+  },
+  imagePreviewContainer: {
+    width: '48%',
+    position: 'relative',
   },
   imagePreview: {
     width: '100%',
-    height: 200,
+    height: 150,
     borderRadius: 12,
-    marginBottom: 8,
   },
   removeImageButton: {
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: 8,
+    right: 8,
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
+    padding: 4,
   },
   imageHint: {
     marginTop: 8,

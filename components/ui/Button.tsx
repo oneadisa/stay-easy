@@ -239,7 +239,6 @@ export function Button({
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
-      gap: 8,
     };
 
     switch (variant) {
@@ -290,7 +289,7 @@ export function Button({
       disabled={disabled}
       style={({ pressed }) => [getButtonStyle(pressed), style]}
     >
-      {leftIcon && <View>{leftIcon}</View>}
+      {leftIcon ? <View style={{ marginRight: 8 }}>{leftIcon}</View> : null}
       <Text 
         variant={getTextVariant()}
         color={getTextColor()}
@@ -304,7 +303,7 @@ export function Button({
       >
         {title}
       </Text>
-      {rightIcon && <View>{rightIcon}</View>}
+      {rightIcon ? <View style={{ marginLeft: 8 }}>{rightIcon}</View> : null}
     </Pressable>
   );
 }

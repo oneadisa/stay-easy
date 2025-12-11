@@ -27,17 +27,17 @@ export function Input({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && (
-        <Text variant="label" style={styles.label}>
+      {label ? (
+        <Text variant="caption" style={styles.label}>
           {label}
         </Text>
-      )}
+      ) : null}
       <TextInput
         style={[
           styles.input,
           {
             backgroundColor: theme.colors.surface,
-            borderColor: error 
+            borderColor: typeof error === 'string' && error.trim().length > 0
               ? theme.colors.error 
               : isFocused 
                 ? theme.colors.primary 
@@ -51,11 +51,16 @@ export function Input({
         onBlur={() => setIsFocused(false)}
         {...props}
       />
-      {error && (
-        <Text variant="caption" color="error" style={styles.error}>
-          {error}
-        </Text>
-      )}
+      {(() => {
+        if (!error || typeof error !== 'string' || error.trim().length === 0) {
+          return null;
+        }
+        return (
+          <Text variant="caption" color="error" style={styles.error}>
+            {error}
+          </Text>
+        );
+      })()}
     </View>
   );
 }
@@ -73,6 +78,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
+    fontFamily: 'Inter-Regular',
   },
   error: {
     marginTop: 4,

@@ -1,17 +1,24 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
 import { Text } from '../components/ui/Text';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useTheme } from '../components/ThemeProvider';
-import { Ionicons } from '@expo/vector-icons';
+import { Calendar, Search, Key, Compass, Users, Star } from 'lucide-react-native';
 import { useAuthUser } from '../state/authStore';
 import { useBookings } from '../utils/BookingContext';
 
-export default function BookingsScreen() {
+export default function BookingsScreen({ navigation }: any) {
   const { theme } = useTheme();
   const { user } = useAuthUser();
-  const { bookings, cancelBooking } = useBookings();
+  const { bookings, cancelBooking, refreshBookings } = useBookings();
+
+  React.useEffect(() => {
+    // Refresh bookings when screen mounts or user changes
+    if (user) {
+      refreshBookings();
+    }
+  }, [user, refreshBookings]);
 
   const upcomingBookings = bookings.filter(booking => booking.status === 'confirmed');
   const pastBookings = bookings.filter(booking => booking.status === 'completed');
@@ -63,10 +70,10 @@ export default function BookingsScreen() {
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <ScrollView contentContainerStyle={styles.emptyContainer}>
           <View style={[styles.illustrationContainer, { backgroundColor: theme.colors.primaryLight }]}>
-            <Ionicons name="calendar-outline" size={80} color={theme.colors.primary} />
+            <Calendar size={80} color={theme.colors.primary} />
           </View>
           
-          <Text variant="h2" style={styles.emptyTitle}>
+          <Text variant="heading" style={styles.emptyTitle}>
             No bookings yet
           </Text>
           
@@ -75,10 +82,10 @@ export default function BookingsScreen() {
           </Text>
           
           {/* Features */}
-          <Card style={[styles.featuresCard, { backgroundColor: theme.colors.surface }]}>
+          <Card style={{ ...styles.featuresCard, backgroundColor: theme.colors.surface }}>
             <View style={styles.featureItem}>
               <View style={[styles.featureIcon, { backgroundColor: theme.colors.primaryLight }]}>
-                <Ionicons name="search" size={20} color={theme.colors.primary} />
+                <Search size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.featureText}>
                 <Text variant="body" style={styles.featureTitle}>Find your perfect stay</Text>
@@ -88,7 +95,7 @@ export default function BookingsScreen() {
             
             <View style={styles.featureItem}>
               <View style={[styles.featureIcon, { backgroundColor: theme.colors.primaryLight }]}>
-                <Ionicons name="calendar" size={20} color={theme.colors.primary} />
+                <Calendar size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.featureText}>
                 <Text variant="body" style={styles.featureTitle}>Book with confidence</Text>
@@ -98,7 +105,7 @@ export default function BookingsScreen() {
             
             <View style={styles.featureItem}>
               <View style={[styles.featureIcon, { backgroundColor: theme.colors.primaryLight }]}>
-                <Ionicons name="key" size={20} color={theme.colors.primary} />
+                <Key size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.featureText}>
                 <Text variant="body" style={styles.featureTitle}>Manage your trips</Text>
@@ -110,12 +117,9 @@ export default function BookingsScreen() {
           {/* CTA Button */}
           <Button
             title="Explore Properties"
-            onPress={() => {
-              
-              Alert.alert('Navigate', 'This would navigate to the Home tab');
-            }}
+            onPress={() => navigation.navigate('Home')}
             style={styles.ctaButton}
-            leftIcon={<Ionicons name="compass" size={20} color="#FFFFFF" />}
+            leftIcon={<Compass size={20} color="#FFFFFF" />}
           />
         </ScrollView>
       </View>
@@ -123,16 +127,16 @@ export default function BookingsScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView style={styles.content}>
-        <Text variant="h2" style={styles.title}>
+        <Text variant="heading" style={styles.title}>
           My Bookings
         </Text>
 
         {/* Upcoming Bookings */}
         {upcomingBookings.length > 0 && (
           <View style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>Upcoming</Text>
+            <Text variant="title" style={styles.sectionTitle}>Upcoming</Text>
             {upcomingBookings.map(booking => (
               <Card key={booking.id} style={styles.bookingCard}>
                 <Image
@@ -145,19 +149,19 @@ export default function BookingsScreen() {
                       {booking.property.title}
                     </Text>
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
-                      <Text style={styles.statusText}>{getStatusText(booking.status)}</Text>
+                      <Text variant="caption" style={styles.statusText}>{getStatusText(booking.status)}</Text>
                     </View>
                   </View>
                   
                   <View style={styles.bookingInfo}>
                     <View style={styles.infoItem}>
-                      <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} />
+                      <Calendar size={14} color={theme.colors.textSecondary} />
                       <Text variant="caption" color="secondary">
                         {new Date(booking.checkIn).toLocaleDateString()} - {new Date(booking.checkOut).toLocaleDateString()}
                       </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="people-outline" size={14} color={theme.colors.textSecondary} />
+                      <Users size={14} color={theme.colors.textSecondary} />
                       <Text variant="caption" color="secondary">
                         {booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}
                       </Text>
@@ -165,8 +169,8 @@ export default function BookingsScreen() {
                   </View>
                   
                   <View style={styles.bookingFooter}>
-                    <Text variant="h3" style={{ color: theme.colors.primary }}>
-                      ${booking.totalPrice}
+                    <Text variant="title" style={{ color: theme.colors.primary }}>
+                      ₦{booking.totalPrice.toLocaleString()}
                     </Text>
                     <TouchableOpacity 
                       style={[styles.cancelButton, { borderColor: theme.colors.border }]}
@@ -184,7 +188,7 @@ export default function BookingsScreen() {
         {/* Past Bookings */}
         {pastBookings.length > 0 && (
           <View style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>Past Stays</Text>
+            <Text variant="title" style={styles.sectionTitle}>Past Stays</Text>
             {pastBookings.map(booking => (
               <Card key={booking.id} style={styles.bookingCard}>
                 <Image
@@ -197,25 +201,25 @@ export default function BookingsScreen() {
                       {booking.property.title}
                     </Text>
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
-                      <Text style={styles.statusText}>{getStatusText(booking.status)}</Text>
+                      <Text variant="caption" style={styles.statusText}>{getStatusText(booking.status)}</Text>
                     </View>
                   </View>
                   
                   <View style={styles.bookingInfo}>
                     <View style={styles.infoItem}>
-                      <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} />
+                      <Calendar size={14} color={theme.colors.textSecondary} />
                       <Text variant="caption" color="secondary">
                         {new Date(booking.checkIn).toLocaleDateString()} - {new Date(booking.checkOut).toLocaleDateString()}
                       </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="people-outline" size={14} color={theme.colors.textSecondary} />
+                      <Users size={14} color={theme.colors.textSecondary} />
                       <Text variant="caption" color="secondary">
                         {booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}
                       </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="star" size={14} color={theme.colors.warning} />
+                      <Star size={14} color={theme.colors.warning} fill={theme.colors.warning} />
                       <Text variant="caption" style={{ color: theme.colors.warning }}>
                         Leave a review
                       </Text>
@@ -223,8 +227,8 @@ export default function BookingsScreen() {
                   </View>
                   
                   <View style={styles.bookingFooter}>
-                    <Text variant="h3" style={{ color: theme.colors.primary }}>
-                      ${booking.totalPrice}
+                    <Text variant="title" style={{ color: theme.colors.primary }}>
+                      ₦{booking.totalPrice.toLocaleString()}
                     </Text>
                     <Text variant="caption" color="secondary">Completed</Text>
                   </View>
@@ -237,7 +241,7 @@ export default function BookingsScreen() {
         {/* Cancelled Bookings */}
         {cancelledBookings.length > 0 && (
           <View style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>Cancelled</Text>
+            <Text variant="title" style={styles.sectionTitle}>Cancelled</Text>
             {cancelledBookings.map(booking => (
               <Card key={booking.id} style={styles.bookingCard}>
                 <Image
@@ -250,19 +254,19 @@ export default function BookingsScreen() {
                       {booking.property.title}
                     </Text>
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
-                      <Text style={styles.statusText}>{getStatusText(booking.status)}</Text>
+                      <Text variant="caption" style={styles.statusText}>{getStatusText(booking.status)}</Text>
                     </View>
                   </View>
                   
                   <View style={styles.bookingInfo}>
                     <View style={styles.infoItem}>
-                      <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} />
+                      <Calendar size={14} color={theme.colors.textSecondary} />
                       <Text variant="caption" color="secondary">
                         {new Date(booking.checkIn).toLocaleDateString()} - {new Date(booking.checkOut).toLocaleDateString()}
                       </Text>
                     </View>
                     <View style={styles.infoItem}>
-                      <Ionicons name="people-outline" size={14} color={theme.colors.textSecondary} />
+                      <Users size={14} color={theme.colors.textSecondary} />
                       <Text variant="caption" color="secondary">
                         {booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}
                       </Text>
@@ -270,8 +274,8 @@ export default function BookingsScreen() {
                   </View>
                   
                   <View style={styles.bookingFooter}>
-                    <Text variant="h3" style={{ color: theme.colors.error }}>
-                      ${booking.totalPrice}
+                    <Text variant="title" style={{ color: theme.colors.error }}>
+                      ₦{booking.totalPrice.toLocaleString()}
                     </Text>
                     <Text variant="caption" color="secondary">Refund processed</Text>
                   </View>
@@ -281,7 +285,7 @@ export default function BookingsScreen() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

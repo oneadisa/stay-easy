@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -14,16 +14,17 @@ import { Text } from "../components/ui/Text";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { useTheme } from "../components/ThemeProvider";
-import { Ionicons } from "@expo/vector-icons";
+import { Search, X, Bell, MapPin, Star, Heart, Home, Bed, Users } from "lucide-react-native";
 import { useAuthUser } from "../state/authStore";
 import { useProperties } from "../utils/PropertiesContext";
 import { useBookings } from "../utils/BookingContext";
-import { SkeletonLoader } from "../components/ui/SkeletonLoader";
+import { PropertyCardSkeleton } from "../components/ui/SkeletonLoader";
+import { ImageCached } from "../components/ui/ImageCached";
 import { SAMPLE_PROPERTIES } from "../utils/sampleProperties";
 import PropertyDetailModal from "../components/ui/PropertyDetailModal";
 import BookingConfirmationModal from "../components/ui/BookingConfirmationModal";
 import BookingSuccessModal from "../components/ui/BookingSuccessModal";
-import { Property } from "../lib/properties";
+import { Property, updatePropertyPrices } from "../lib/properties";
 import { BookingDates } from "../types/bookings";
 
 const { width } = Dimensions.get("window");
@@ -51,6 +52,11 @@ export default function HomeScreen({ navigation }: any) {
   // Use properties from context
   const { properties, refreshProperties, loading } = useProperties();
   const { addBooking } = useBookings();
+
+  // Update property prices on mount if needed
+  useEffect(() => {
+    updatePropertyPrices().catch(console.error);
+  }, []);
 
   const categories = [
     "All",
@@ -147,8 +153,11 @@ export default function HomeScreen({ navigation }: any) {
     setGuests(1);
   };
 
-  const displayProperties =
-    properties.length > 0 ? properties : SAMPLE_PROPERTIES;
+  // Always combine user properties with sample properties
+  // Filter out any duplicates (in case a sample property was somehow saved)
+  const sampleIds = new Set(SAMPLE_PROPERTIES.map(p => p.id));
+  const userProperties = properties.filter(p => !sampleIds.has(p.id));
+  const displayProperties = [...userProperties, ...SAMPLE_PROPERTIES];
 
   const filteredProperties = displayProperties.filter((property) => {
     const matchesSearch =
@@ -188,7 +197,15 @@ export default function HomeScreen({ navigation }: any) {
   };
 
   if (loading) {
-    return <SkeletonLoader theme={theme} />;
+    return (
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+        <View style={{ padding: 20 }}>
+          <PropertyCardSkeleton />
+          <PropertyCardSkeleton />
+          <PropertyCardSkeleton />
+        </View>
+      </SafeAreaView>
+    );
   }
 
   const featuredProperties = getFeaturedProperties();
@@ -236,7 +253,7 @@ export default function HomeScreen({ navigation }: any) {
             <Text variant="body" color="secondary" style={styles.greeting}>
               {getGreeting()}, {user?.displayName?.split(" ")[0] || "Guest"} 👋
             </Text>
-            <Text variant="h2" style={styles.headerTitle}>
+            <Text variant="heading" style={styles.headerTitle}>
               Find Your Perfect Stay
             </Text>
           </View>
@@ -247,11 +264,7 @@ export default function HomeScreen({ navigation }: any) {
             ]}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name="notifications-outline"
-              size={24}
-              color={theme.colors.textPrimary}
-            />
+            <Bell size={24} color={theme.colors.textPrimary} />
             <View
               style={[styles.badge, { backgroundColor: theme.colors.primary }]}
             />
@@ -271,13 +284,12 @@ export default function HomeScreen({ navigation }: any) {
               { backgroundColor: theme.colors.surface },
             ]}
           >
-            <Ionicons
-              name="search"
-              size={20}
-              color={theme.colors.textSecondary}
-            />
+            <Search size={20} color={theme.colors.textSecondary} />
             <TextInput
-              style={[styles.searchInput, { color: theme.colors.textPrimary }]}
+              style={[
+                styles.searchInput,
+                { color: theme.colors.textPrimary, fontFamily: 'MontserratAlternates-Regular' },
+              ]}
               placeholder="Search destinations, cities, or properties..."
               placeholderTextColor={theme.colors.textSecondary}
               value={searchQuery}
@@ -285,11 +297,7 @@ export default function HomeScreen({ navigation }: any) {
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <Ionicons
-                  name="close-circle"
-                  size={20}
-                  color={theme.colors.textSecondary}
-                />
+                <X size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             )}
           </View>
@@ -323,15 +331,13 @@ export default function HomeScreen({ navigation }: any) {
             >
               <Text
                 variant="body"
-                style={[
-                  styles.categoryText,
-                  {
-                    color:
-                      selectedCategory === category
-                        ? "#FFFFFF"
-                        : theme.colors.textPrimary,
-                  },
-                ]}
+                style={{
+                  ...styles.categoryText,
+                  color:
+                    selectedCategory === category
+                      ? "#FFFFFF"
+                      : theme.colors.textPrimary,
+                }}
               >
                 {category}
               </Text>
@@ -343,9 +349,9 @@ export default function HomeScreen({ navigation }: any) {
         {featuredProperties.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text variant="h3">Featured Properties</Text>
+              <Text variant="title">Featured Properties</Text>
               <TouchableOpacity>
-                <Text style={[styles.seeAll, { color: theme.colors.primary }]}>
+                <Text variant="body" style={{ ...styles.seeAll, color: theme.colors.primary }}>
                   See all
                 </Text>
               </TouchableOpacity>
@@ -372,13 +378,18 @@ export default function HomeScreen({ navigation }: any) {
                   <Image
                     source={{
                       uri:
-                        property.images[0] || "https://via.placeholder.com/300",
+                        property.images?.[0] && property.images[0].trim().length > 0
+                          ? property.images[0]
+                          : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
                     }}
                     style={styles.featuredImage}
+                    onError={() => {
+                      // Fallback handled by defaultSource if needed
+                    }}
                   />
                   <View style={styles.featuredBadge}>
-                    <Ionicons name="star" size={12} color="#FFF" />
-                    <Text style={styles.featuredBadgeText}>Featured</Text>
+                    <Star size={12} color="#FFF" fill="#FFF" />
+                    <Text variant="caption" style={styles.featuredBadgeText}>Featured</Text>
                   </View>
                   <View
                     style={[
@@ -387,28 +398,24 @@ export default function HomeScreen({ navigation }: any) {
                     ]}
                   >
                     <Text
-                      variant="h3"
+                      variant="title"
                       style={styles.featuredTitle}
                       numberOfLines={1}
                     >
                       {property.title}
                     </Text>
                     <View style={styles.featuredLocation}>
-                      <Ionicons
-                        name="location"
-                        size={14}
-                        color={theme.colors.textSecondary}
-                      />
+                      <MapPin size={14} color={theme.colors.textSecondary} />
                       <Text variant="caption" color="secondary">
                         {property.location.city}, {property.location.country}
                       </Text>
                     </View>
                     <View style={styles.featuredFooter}>
                       <Text
-                        variant="h3"
+                        variant="title"
                         style={{ color: theme.colors.primary }}
                       >
-                        ${property.pricing.perNight}
+                        ₦{property.pricing.perNight.toLocaleString()}
                       </Text>
                       <Text variant="caption" color="secondary">
                         /night
@@ -424,7 +431,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Category Properties */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text variant="h3" style={styles.sectionTitle}>
+            <Text variant="title" style={styles.sectionTitle}>
               {selectedCategory === "All"
                 ? "All Properties"
                 : selectedCategory + "s"}
@@ -443,13 +450,9 @@ export default function HomeScreen({ navigation }: any) {
                   { backgroundColor: theme.colors.primaryLight },
                 ]}
               >
-                <Ionicons
-                  name="home-outline"
-                  size={48}
-                  color={theme.colors.primary}
-                />
+                <Home size={48} color={theme.colors.primary} />
               </View>
-              <Text variant="h3" style={styles.emptyTitle}>
+              <Text variant="title" style={styles.emptyTitle}>
                 {searchQuery
                   ? "No matches found"
                   : `No ${selectedCategory.toLowerCase()} properties`}
@@ -487,14 +490,19 @@ export default function HomeScreen({ navigation }: any) {
                   <Image
                     source={{
                       uri:
-                        property.images[0] || "https://via.placeholder.com/200",
+                        property.images?.[0] && property.images[0].trim().length > 0
+                          ? property.images[0]
+                          : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
                     }}
                     style={styles.propertyImage}
+                    onError={() => {
+                      // Fallback handled
+                    }}
                   />
                   {!property.id?.startsWith("sample-") && (
                     <View style={styles.userPropertyBadge}>
-                      <Ionicons name="star" size={12} color="#FFF" />
-                      <Text style={styles.userPropertyBadgeText}>
+                      <Star size={12} color="#FFF" fill="#FFF" />
+                      <Text variant="caption" style={styles.userPropertyBadgeText}>
                         Your Listing
                       </Text>
                     </View>
@@ -503,7 +511,7 @@ export default function HomeScreen({ navigation }: any) {
                     style={styles.favoriteButton}
                     activeOpacity={0.7}
                   >
-                    <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
+                    <Heart size={20} color="#FFFFFF" />
                   </TouchableOpacity>
 
                   <View style={styles.propertyInfo}>
@@ -515,11 +523,7 @@ export default function HomeScreen({ navigation }: any) {
                       {property.title}
                     </Text>
                     <View style={styles.propertyLocation}>
-                      <Ionicons
-                        name="location-outline"
-                        size={12}
-                        color={theme.colors.textSecondary}
-                      />
+                      <MapPin size={12} color={theme.colors.textSecondary} />
                       <Text
                         variant="caption"
                         color="secondary"
@@ -530,21 +534,13 @@ export default function HomeScreen({ navigation }: any) {
                     </View>
                     <View style={styles.propertyDetails}>
                       <View style={styles.propertyDetailItem}>
-                        <Ionicons
-                          name="bed-outline"
-                          size={14}
-                          color={theme.colors.textSecondary}
-                        />
+                        <Bed size={14} color={theme.colors.textSecondary} />
                         <Text variant="caption" color="secondary">
                           {property.bedrooms}
                         </Text>
                       </View>
                       <View style={styles.propertyDetailItem}>
-                        <Ionicons
-                          name="people-outline"
-                          size={14}
-                          color={theme.colors.textSecondary}
-                        />
+                        <Users size={14} color={theme.colors.textSecondary} />
                         <Text variant="caption" color="secondary">
                           {property.guests}
                         </Text>
@@ -554,12 +550,12 @@ export default function HomeScreen({ navigation }: any) {
                       <View>
                         <Text
                           variant="body"
-                          style={[
-                            styles.propertyPrice,
-                            { color: theme.colors.primary },
-                          ]}
+                          style={{
+                            ...styles.propertyPrice,
+                            color: theme.colors.primary,
+                          }}
                         >
-                          ${property.pricing.perNight}
+                          ₦{property.pricing.perNight.toLocaleString()}
                         </Text>
                         <Text variant="caption" color="secondary">
                           per night
@@ -571,16 +567,12 @@ export default function HomeScreen({ navigation }: any) {
                           { backgroundColor: theme.colors.primaryLight },
                         ]}
                       >
-                        <Ionicons
-                          name="star"
-                          size={12}
-                          color={theme.colors.primary}
-                        />
+                        <Star size={12} color={theme.colors.primary} fill={theme.colors.primary} />
                         <Text
-                          style={[
-                            styles.ratingText,
-                            { color: theme.colors.primary },
-                          ]}
+                          style={{
+                            ...styles.ratingText,
+                            color: theme.colors.primary,
+                          }}
                         >
                           4.8
                         </Text>
@@ -688,6 +680,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
+    fontFamily: 'MontserratAlternates-Regular',
   },
   categoriesContainer: {
     marginTop: 8,

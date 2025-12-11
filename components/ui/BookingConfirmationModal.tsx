@@ -13,7 +13,7 @@ import { useTheme } from '../ThemeProvider';
 import { Text } from './Text';
 import { Button } from './Button';
 import { Card } from './Card';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, X, Calendar, Users, CheckCircle } from 'lucide-react-native';
 
 interface BookingConfirmationModalProps {
   visible: boolean;
@@ -57,28 +57,28 @@ export default function BookingConfirmationModal({
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
           <TouchableOpacity onPress={onBack}>
-            <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+            <ArrowLeft size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
-          <Text variant="h3">Confirm Booking</Text>
+          <Text variant="title">Confirm Booking</Text>
           <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color={theme.colors.textPrimary} />
+            <X size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Property Summary */}
           <Card style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>Your Stay</Text>
+            <Text variant="title" style={styles.sectionTitle}>Your Stay</Text>
             <View style={styles.propertySummary}>
               <Text variant="body" style={styles.propertyTitle}>{property.title}</Text>
               <View style={styles.dates}>
-                <Ionicons name="calendar-outline" size={16} color={theme.colors.textSecondary} />
+                <Calendar size={16} color={theme.colors.textSecondary} />
                 <Text variant="body" color="secondary">
                   {dates.checkIn.toLocaleDateString()} - {dates.checkOut.toLocaleDateString()} ({nights} nights)
                 </Text>
               </View>
               <View style={styles.guests}>
-                <Ionicons name="people-outline" size={16} color={theme.colors.textSecondary} />
+                <Users size={16} color={theme.colors.textSecondary} />
                 <Text variant="body" color="secondary">{guests} {guests === 1 ? 'guest' : 'guests'}</Text>
               </View>
             </View>
@@ -86,32 +86,32 @@ export default function BookingConfirmationModal({
 
           {/* Price Breakdown */}
           <Card style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>Price Details</Text>
+            <Text variant="title" style={styles.sectionTitle}>Price Details</Text>
             <View style={styles.priceDetails}>
               <View style={styles.priceRow}>
                 <Text variant="body" color="secondary">
-                  ${property.pricing.perNight} × {nights} nights
+                  {`₦${property.pricing.perNight.toLocaleString()} × ${nights} nights`}
                 </Text>
-                <Text variant="body">${property.pricing.perNight * nights}</Text>
+                <Text variant="body">{`₦${(property.pricing.perNight * nights).toLocaleString()}`}</Text>
               </View>
               <View style={styles.priceRow}>
                 <Text variant="body" color="secondary">Cleaning fee</Text>
-                <Text variant="body">${property.pricing.cleaningFee}</Text>
+                <Text variant="body">{`₦${property.pricing.cleaningFee.toLocaleString()}`}</Text>
               </View>
               <View style={styles.priceRow}>
                 <Text variant="body" color="secondary">Service fee</Text>
-                <Text variant="body">${Math.round(totalPrice * 0.1)}</Text>
+                <Text variant="body">{`₦${Math.round(totalPrice * 0.1).toLocaleString()}`}</Text>
               </View>
               <View style={[styles.priceRow, styles.totalRow]}>
-                <Text variant="h3">Total</Text>
-                <Text variant="h3">${totalPrice + Math.round(totalPrice * 0.1)}</Text>
+                <Text variant="title">Total</Text>
+                <Text variant="title">{`₦${(totalPrice + Math.round(totalPrice * 0.1)).toLocaleString()}`}</Text>
               </View>
             </View>
           </Card>
 
           {/* Cancellation Policy */}
           <Card style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>Cancellation Policy</Text>
+            <Text variant="title" style={styles.sectionTitle}>Cancellation Policy</Text>
             <Text variant="body" color="secondary">
               Free cancellation within 48 hours of booking. After that, cancel up to 7 days before check-in for a partial refund.
             </Text>
@@ -119,22 +119,22 @@ export default function BookingConfirmationModal({
 
           {/* House Rules */}
           <Card style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>House Rules</Text>
+            <Text variant="title" style={styles.sectionTitle}>House Rules</Text>
             <View style={styles.rules}>
               <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={16} color={theme.colors.primary} />
+                <CheckCircle size={16} color={theme.colors.primary} />
                 <Text variant="body">No smoking</Text>
               </View>
               <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={16} color={theme.colors.primary} />
+                <CheckCircle size={16} color={theme.colors.primary} />
                 <Text variant="body">No pets</Text>
               </View>
               <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={16} color={theme.colors.primary} />
+                <CheckCircle size={16} color={theme.colors.primary} />
                 <Text variant="body">No parties or events</Text>
               </View>
               <View style={styles.ruleItem}>
-                <Ionicons name="checkmark-circle" size={16} color={theme.colors.primary} />
+                <CheckCircle size={16} color={theme.colors.primary} />
                 <Text variant="body">Check-in: 3:00 PM - 10:00 PM</Text>
               </View>
             </View>
@@ -144,8 +144,8 @@ export default function BookingConfirmationModal({
         {/* Footer */}
         <View style={[styles.footer, { borderTopColor: theme.colors.border }]}>
           <View style={styles.footerPrice}>
-            <Text variant="h3" style={{ color: theme.colors.primary }}>
-              ${totalPrice + Math.round(totalPrice * 0.1)}
+            <Text variant="title" style={{ color: theme.colors.primary }}>
+              {`$${totalPrice + Math.round(totalPrice * 0.1)}`}
             </Text>
             <Text variant="caption" color="secondary">total</Text>
           </View>

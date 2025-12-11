@@ -47,7 +47,7 @@ export function ThemeToggle({ style }: ThemeToggleProps) {
       ]}
     >
       <View style={styles.content}>
-        <Text variant="label" style={styles.label}>
+        <Text variant="caption" style={styles.label}>
           Theme
         </Text>
         <Text variant="body" color="secondary">

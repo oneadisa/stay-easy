@@ -1,121 +1,13 @@
-// import React from 'react';
-// import { Text as RNText, TextStyle } from 'react-native';
-// import { useTheme } from '../ThemeProvider';
-
-// interface TextProps {
-//   children: React.ReactNode;
-//   variant?: 'h1' | 'h2' | 'h3' | 'body' | 'caption' | 'label';
-//   color?: 'primary' | 'secondary' | 'inverse' | 'success' | 'warning' | 'error';
-//   style?: TextStyle;
-//   numberOfLines?: number;
-// }
-
-// export function Text({ 
-//   children, 
-//   variant = 'body', 
-//   color = 'primary',
-//   style,
-//   numberOfLines 
-// }: TextProps) {
-//   const { theme } = useTheme();
-
-//   const getTextStyle = (): TextStyle => {
-//     const baseStyle: TextStyle = {
-//       color: theme.colors.textPrimary,
-//     };
-
-//     // Variant styles
-//     switch (variant) {
-//       case 'h1':
-//         return {
-//           ...baseStyle,
-//           fontSize: 32,
-//           fontWeight: '700',
-//           lineHeight: 40,
-//         };
-//       case 'h2':
-//         return {
-//           ...baseStyle,
-//           fontSize: 24,
-//           fontWeight: '600',
-//           lineHeight: 32,
-//         };
-//       case 'h3':
-//         return {
-//           ...baseStyle,
-//           fontSize: 20,
-//           fontWeight: '600',
-//           lineHeight: 28,
-//         };
-//       case 'body':
-//         return {
-//           ...baseStyle,
-//           fontSize: 16,
-//           fontWeight: '400',
-//           lineHeight: 24,
-//         };
-//       case 'caption':
-//         return {
-//           ...baseStyle,
-//           fontSize: 14,
-//           fontWeight: '400',
-//           lineHeight: 20,
-//         };
-//       case 'label':
-//         return {
-//           ...baseStyle,
-//           fontSize: 14,
-//           fontWeight: '500',
-//           lineHeight: 20,
-//         };
-//       default:
-//         return baseStyle;
-//     }
-//   };
-
-//   const getTextColor = (): string => {
-//     switch (color) {
-//       case 'primary':
-//         return theme.colors.textPrimary;
-//       case 'secondary':
-//         return theme.colors.textSecondary;
-//       case 'inverse':
-//         return theme.colors.textInverse;
-//       case 'success':
-//         return theme.colors.success;
-//       case 'warning':
-//         return theme.colors.warning;
-//       case 'error':
-//         return theme.colors.error;
-//       default:
-//         return theme.colors.textPrimary;
-//     }
-//   };
-
-//   return (
-//     <RNText 
-//       style={[
-//         getTextStyle(),
-//         { color: getTextColor() },
-//         style
-//       ]}
-//       numberOfLines={numberOfLines}
-//     >
-//       {children}
-//     </RNText>
-//   );
-// }
-
-
 import React from 'react';
-import { Text as RNText, TextStyle, StyleProp } from 'react-native';
+import { Text as RNText, TextStyle } from 'react-native';
 import { useTheme } from '../ThemeProvider';
+import { fontFamily } from '../../utils/fonts';
 
 interface TextProps {
   children: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'body' | 'caption' | 'label';
-  color?: 'primary' | 'secondary' | 'inverse' | 'success' | 'warning' | 'error';
-  style?: StyleProp<TextStyle>; // Change this line
+  variant?: 'display' | 'heading' | 'title' | 'body' | 'caption' | 'small';
+  color?: 'primary' | 'secondary' | 'muted' | 'inverse' | 'success' | 'warning' | 'error';
+  style?: TextStyle;
   numberOfLines?: number;
 }
 
@@ -129,56 +21,48 @@ export function Text({
   const { theme } = useTheme();
 
   const getTextStyle = (): TextStyle => {
-    const baseStyle: TextStyle = {
-      color: theme.colors.textPrimary,
+    // Use typography scale from theme
+    // Poller One for headings, Montserrat Alternates for body text
+    const baseStyle = {
+      fontFamily: fontFamily.regular,
     };
 
-    // Variant styles
     switch (variant) {
-      case 'h1':
+      case 'display':
         return {
-          ...baseStyle,
-          fontSize: 32,
-          fontWeight: '700',
-          lineHeight: 40,
+          ...theme.typography.display,
+          fontFamily: fontFamily.heading, // Poller One
         };
-      case 'h2':
+      case 'heading':
         return {
-          ...baseStyle,
-          fontSize: 24,
-          fontWeight: '600',
-          lineHeight: 32,
+          ...theme.typography.heading,
+          fontFamily: fontFamily.heading, // Poller One
         };
-      case 'h3':
+      case 'title':
         return {
-          ...baseStyle,
-          fontSize: 20,
-          fontWeight: '600',
-          lineHeight: 28,
+          ...theme.typography.title,
+          fontFamily: fontFamily.heading, // Poller One
         };
       case 'body':
         return {
-          ...baseStyle,
-          fontSize: 16,
-          fontWeight: '400',
-          lineHeight: 24,
+          ...theme.typography.body,
+          fontFamily: fontFamily.regular, // Montserrat Alternates Regular
         };
       case 'caption':
         return {
-          ...baseStyle,
-          fontSize: 14,
-          fontWeight: '400',
-          lineHeight: 20,
+          ...theme.typography.caption,
+          fontFamily: fontFamily.regular, // Montserrat Alternates Regular
         };
-      case 'label':
+      case 'small':
         return {
-          ...baseStyle,
-          fontSize: 14,
-          fontWeight: '500',
-          lineHeight: 20,
+          ...theme.typography.small,
+          fontFamily: fontFamily.medium, // Montserrat Alternates Medium
         };
       default:
-        return baseStyle;
+        return {
+          ...theme.typography.body,
+          fontFamily: fontFamily.regular, // Montserrat Alternates Regular
+        };
     }
   };
 
@@ -188,6 +72,8 @@ export function Text({
         return theme.colors.textPrimary;
       case 'secondary':
         return theme.colors.textSecondary;
+      case 'muted':
+        return theme.colors.textMuted;
       case 'inverse':
         return theme.colors.textInverse;
       case 'success':

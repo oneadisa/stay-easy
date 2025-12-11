@@ -234,15 +234,7 @@ function TabNavigator() {
           tabBarIcon: ({ focused }) => <TabIcon name="bookings" focused={focused} />,
         }}
       />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen}
-        options={{
-          title: 'Profile',
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
-        }}
-      />
+      
       <Tab.Screen 
         name="Host" 
         component={HostScreen}
@@ -250,6 +242,16 @@ function TabNavigator() {
           title: 'Host',
           tabBarLabel: 'Host',
           tabBarIcon: ({ focused }) => <TabIcon name="host" focused={focused} />,
+        }}
+      />
+
+<Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen}
+        options={{
+          title: 'Profile',
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
         }}
       />
     </Tab.Navigator>

@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button';
 import { useTheme } from '../components/ThemeProvider';
 import { useAuthUser } from '../state/authStore';
 import { logout } from '../lib/auth';
-import { Ionicons, } from '@expo/vector-icons';
+import { Camera, User, Bookmark, Heart, Wallet, Bell, HelpCircle, ChevronRight, LogOut, Sun, Moon } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
@@ -50,40 +50,34 @@ export default function ProfileScreen() {
 
   const menuItems = [
     {
-      icon: 'person-outline',
+      icon: User,
       label: 'Edit Profile',
       onPress: () => console.log('Edit Profile'),
-      iconFamily: 'Ionicons' as const,
     },
     {
-      icon: 'bookmark-outline',
+      icon: Bookmark,
       label: 'My Bookings',
       onPress: () => console.log('My Bookings'),
-      iconFamily: 'Ionicons' as const,
     },
     {
-      icon: 'heart-outline',
+      icon: Heart,
       label: 'Favorites',
       onPress: () => console.log('Favorites'),
-      iconFamily: 'Ionicons' as const,
     },
     {
-      icon: 'wallet-outline',
+      icon: Wallet,
       label: 'Payment Methods',
       onPress: () => console.log('Payment Methods'),
-      iconFamily: 'Ionicons' as const,
     },
     {
-      icon: 'notifications-outline',
+      icon: Bell,
       label: 'Notifications',
       onPress: () => console.log('Notifications'),
-      iconFamily: 'Ionicons' as const,
     },
     {
-      icon: 'help-circle-outline',
+      icon: HelpCircle,
       label: 'Help & Support',
       onPress: () => console.log('Help & Support'),
-      iconFamily: 'Ionicons' as const,
     },
   ];
 
@@ -94,7 +88,10 @@ export default function ProfileScreen() {
           <View style={styles.headerContent}>
             <View style={styles.avatarContainer}>
               <View style={[styles.avatar, { backgroundColor: theme.colors.primaryLight }]}>
-                <Text style={[styles.avatarText, { color: theme.colors.primary }]}>
+                <Text 
+                  variant="display" 
+                  style={[styles.avatarText, { color: theme.colors.primary }]}
+                >
                   {user?.displayName ? getInitials(user.displayName) : 'U'}
                 </Text>
               </View>
@@ -102,14 +99,14 @@ export default function ProfileScreen() {
                 style={[styles.editAvatarButton, { backgroundColor: '#FFFFFF' }]}
                 activeOpacity={0.7}
               >
-                <Ionicons name="camera" size={16} color={theme.colors.primary} />
+                <Camera size={16} color={theme.colors.primary} />
               </TouchableOpacity>
             </View>
             
-            <Text style={styles.userName}>
+            <Text variant="heading" style={styles.userName}>
               {user?.displayName || 'User'}
             </Text>
-            <Text style={styles.userEmail}>
+            <Text variant="body" color="secondary" style={styles.userEmail}>
               {user?.email}
             </Text>
           </View>
@@ -130,21 +127,13 @@ export default function ProfileScreen() {
               >
                 <View style={styles.menuItemLeft}>
                   <View style={[styles.menuIconContainer, { backgroundColor: theme.colors.primaryLight }]}>
-                    <Ionicons 
-                      name={item.icon as any} 
-                      size={22} 
-                      color={theme.colors.primary} 
-                    />
+                    <item.icon size={22} color={theme.colors.primary} />
                   </View>
                   <Text variant="body" style={styles.menuItemLabel}>
                     {item.label}
                   </Text>
                 </View>
-                <Ionicons 
-                  name="chevron-forward" 
-                  size={20} 
-                  color={theme.colors.textSecondary} 
-                />
+                <ChevronRight size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             ))}
           </Card>
@@ -153,11 +142,11 @@ export default function ProfileScreen() {
             <View style={styles.themeHeader}>
               <View style={styles.themeHeaderLeft}>
                 <View style={[styles.menuIconContainer, { backgroundColor: theme.colors.primaryLight }]}>
-                  <Ionicons 
-                    name={mode === 'light' ? 'sunny' : 'moon'} 
-                    size={22} 
-                    color={theme.colors.primary} 
-                  />
+                  {mode === 'light' ? (
+                    <Sun size={22} color={theme.colors.primary} />
+                  ) : (
+                    <Moon size={22} color={theme.colors.primary} />
+                  )}
                 </View>
                 <View>
                   <Text variant="body" style={styles.themeTitle}>
@@ -203,7 +192,7 @@ export default function ProfileScreen() {
             onPress={handleLogout}
             variant="outline"
             style={styles.logoutButton}
-            leftIcon={<Ionicons name="log-out-outline" size={20} color={theme.colors.error} />}
+            leftIcon={<LogOut size={20} color={theme.colors.error} />}
           />
         </View>
       </ScrollView>
@@ -214,6 +203,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // backgroundColor: 'blue'
   },
   header: {
     paddingTop: 60,
