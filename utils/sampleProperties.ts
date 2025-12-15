@@ -1,7 +1,5 @@
 import { Property } from "../lib/properties";
 
-// Using Unsplash images which are reliable and free
-// Format: https://images.unsplash.com/photo-{id}?w={width}&h={height}&fit=crop
 export const SAMPLE_PROPERTIES: Property[] = [
   {
     id: 'sample-1',

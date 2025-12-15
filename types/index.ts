@@ -5,13 +5,14 @@ export type UserDoc = {
   email: string;
   photoURL?: string;
   phoneNumber?: string;
-  role: 'guest' | 'host' | 'admin';
+  role: "guest" | "host" | "admin";
   createdAt: number;
   updatedAt: number;
+  favorites?: string[];
 };
 
 // Property types
-export type PropertyType = 'apartment' | 'house' | 'villa' | 'cabin' | 'other';
+export type PropertyType = "apartment" | "house" | "villa" | "cabin" | "other";
 
 export type Location = {
   address: string;
@@ -42,7 +43,7 @@ export type Property = {
 };
 
 // Booking types
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
 
 export type Booking = {
   id: string;
@@ -87,4 +88,12 @@ export type TabParamList = {
   Bookings: undefined;
   Profile: undefined;
   Host: undefined;
+};
+
+// Add this new type
+export type FavoritesContextType = {
+  favorites: string[];
+  toggleFavorite: (propertyId: string) => Promise<void>;
+  isFavorite: (propertyId: string) => boolean;
+  loading: boolean;
 };
