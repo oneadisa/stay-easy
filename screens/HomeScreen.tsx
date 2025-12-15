@@ -14,7 +14,17 @@ import { Text } from "../components/ui/Text";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { useTheme } from "../components/ThemeProvider";
-import { Search, X, Bell, MapPin, Star, Heart, Home, Bed, Users } from "lucide-react-native";
+import {
+  Search,
+  X,
+  Bell,
+  MapPin,
+  Star,
+  Heart,
+  Home,
+  Bed,
+  Users,
+} from "lucide-react-native";
 import { useAuthUser } from "../state/authStore";
 import { useProperties } from "../utils/PropertiesContext";
 import { useBookings } from "../utils/BookingContext";
@@ -26,6 +36,7 @@ import BookingConfirmationModal from "../components/ui/BookingConfirmationModal"
 import BookingSuccessModal from "../components/ui/BookingSuccessModal";
 import { Property, updatePropertyPrices } from "../lib/properties";
 import { BookingDates } from "../types/bookings";
+import { useFavorites } from "../state/favouritesStore";
 
 const { width } = Dimensions.get("window");
 
@@ -35,6 +46,7 @@ export default function HomeScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null
@@ -155,8 +167,8 @@ export default function HomeScreen({ navigation }: any) {
 
   // Always combine user properties with sample properties
   // Filter out any duplicates (in case a sample property was somehow saved)
-  const sampleIds = new Set(SAMPLE_PROPERTIES.map(p => p.id));
-  const userProperties = properties.filter(p => !sampleIds.has(p.id));
+  const sampleIds = new Set(SAMPLE_PROPERTIES.map((p) => p.id));
+  const userProperties = properties.filter((p) => !sampleIds.has(p.id));
   const displayProperties = [...userProperties, ...SAMPLE_PROPERTIES];
 
   const filteredProperties = displayProperties.filter((property) => {
@@ -198,7 +210,9 @@ export default function HomeScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
+      >
         <View style={{ padding: 20 }}>
           <PropertyCardSkeleton />
           <PropertyCardSkeleton />
@@ -288,7 +302,10 @@ export default function HomeScreen({ navigation }: any) {
             <TextInput
               style={[
                 styles.searchInput,
-                { color: theme.colors.textPrimary, fontFamily: 'MontserratAlternates-Regular' },
+                {
+                  color: theme.colors.textPrimary,
+                  fontFamily: "MontserratAlternates-Regular",
+                },
               ]}
               placeholder="Search destinations, cities, or properties..."
               placeholderTextColor={theme.colors.textSecondary}
@@ -351,7 +368,10 @@ export default function HomeScreen({ navigation }: any) {
             <View style={styles.sectionHeader}>
               <Text variant="title">Featured Properties</Text>
               <TouchableOpacity>
-                <Text variant="body" style={{ ...styles.seeAll, color: theme.colors.primary }}>
+                <Text
+                  variant="body"
+                  style={{ ...styles.seeAll, color: theme.colors.primary }}
+                >
                   See all
                 </Text>
               </TouchableOpacity>
@@ -378,7 +398,8 @@ export default function HomeScreen({ navigation }: any) {
                   <Image
                     source={{
                       uri:
-                        property.images?.[0] && property.images[0].trim().length > 0
+                        property.images?.[0] &&
+                        property.images[0].trim().length > 0
                           ? property.images[0]
                           : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
                     }}
@@ -389,7 +410,9 @@ export default function HomeScreen({ navigation }: any) {
                   />
                   <View style={styles.featuredBadge}>
                     <Star size={12} color="#FFF" fill="#FFF" />
-                    <Text variant="caption" style={styles.featuredBadgeText}>Featured</Text>
+                    <Text variant="caption" style={styles.featuredBadgeText}>
+                      Featured
+                    </Text>
                   </View>
                   <View
                     style={[
@@ -490,7 +513,8 @@ export default function HomeScreen({ navigation }: any) {
                   <Image
                     source={{
                       uri:
-                        property.images?.[0] && property.images[0].trim().length > 0
+                        property.images?.[0] &&
+                        property.images[0].trim().length > 0
                           ? property.images[0]
                           : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
                     }}
@@ -502,16 +526,33 @@ export default function HomeScreen({ navigation }: any) {
                   {!property.id?.startsWith("sample-") && (
                     <View style={styles.userPropertyBadge}>
                       <Star size={12} color="#FFF" fill="#FFF" />
-                      <Text variant="caption" style={styles.userPropertyBadgeText}>
+                      <Text
+                        variant="caption"
+                        style={styles.userPropertyBadgeText}
+                      >
                         Your Listing
                       </Text>
                     </View>
                   )}
-                  <TouchableOpacity
+                  {/* <TouchableOpacity
                     style={styles.favoriteButton}
                     activeOpacity={0.7}
                   >
                     <Heart size={20} color="#FFFFFF" />
+                  </TouchableOpacity> */}
+
+                  <TouchableOpacity
+                    style={styles.favoriteButton}
+                    activeOpacity={0.7}
+                    onPress={() => toggleFavorite(property.id!)}
+                  >
+                    <Heart
+                      size={20}
+                      color={isFavorite(property.id!) ? "#FF385C" : "#FFFFFF"}
+                      fill={
+                        isFavorite(property.id!) ? "#FF385C" : "transparent"
+                      }
+                    />
                   </TouchableOpacity>
 
                   <View style={styles.propertyInfo}>
@@ -567,7 +608,11 @@ export default function HomeScreen({ navigation }: any) {
                           { backgroundColor: theme.colors.primaryLight },
                         ]}
                       >
-                        <Star size={12} color={theme.colors.primary} fill={theme.colors.primary} />
+                        <Star
+                          size={12}
+                          color={theme.colors.primary}
+                          fill={theme.colors.primary}
+                        />
                         <Text
                           style={{
                             ...styles.ratingText,
@@ -638,7 +683,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 60,
     paddingBottom: 20,
   },
   greeting: {
@@ -680,7 +725,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    fontFamily: 'MontserratAlternates-Regular',
+    fontFamily: "MontserratAlternates-Regular",
   },
   categoriesContainer: {
     marginTop: 8,

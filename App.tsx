@@ -6,6 +6,7 @@ import { PropertiesProvider } from './utils/PropertiesContext';
 import AppNavigator from './navigation/AppNavigator';
 import { BookingProvider } from './utils/BookingContext';
 import { useCustomFonts } from './utils/fonts';
+import { FavoritesProvider } from './state/favouritesStore';
 
 function AppContent() {
   const { theme } = useTheme();
@@ -29,6 +30,7 @@ function AppContent() {
 
 export default function App() {
   return (
+    <FavoritesProvider>
     <ThemeProvider>
       <PropertiesProvider>
         <BookingProvider>
@@ -36,5 +38,6 @@ export default function App() {
         </BookingProvider>
       </PropertiesProvider>
     </ThemeProvider>
+    </FavoritesProvider>
   );
 }
